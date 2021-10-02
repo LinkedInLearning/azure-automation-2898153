@@ -1,4 +1,6 @@
-﻿#This function creates an Azure AD Service Principal
+#This function creates an Azure AD Service Principal
+#CreatedBy: Neeraj Kumar
+#Date: December 2020
 function CreateServicePrincipal {
   param($username, $password)
 
