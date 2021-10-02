@@ -1,4 +1,9 @@
-﻿$Creds = Get-AutomationPSCredential -Name 'Creds'
+#Created By: Neeraj Kumar
+#Date: December 2020
+#This script will read the excel file uploaded to the storage account and will extract the values one row at a time.
+#and passes it on to another PowerShell script for the purpose of VM creation.
+
+$Creds = Get-AutomationPSCredential -Name 'Creds'
 $TenantID = Get-AutomationVariable -Name 'TenantID'
 
 Connect-AzAccount -ServicePrincipal -Credential $Creds -Tenant $TenantID
