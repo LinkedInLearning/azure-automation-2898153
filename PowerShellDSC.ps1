@@ -1,12 +1,18 @@
 Configuration WebServer
 {
-    Import-DscResource -ModuleName PSDesiredStateConfiguration -Name Service, File, Registry
-    Import-DSCResource -Name WindowsFeature
+    param(
+    [Parameter(Mandatory=$true)]
+    [string] $NodeNames = "localhost",
+    [string] $AcctKey = "4PJREBT6kPMh9ejQwIhoU+vmOWdd7WYCVIhDEbttPPZVln8HerqOCQR+PTXlSMd0AZd4tVdRPIy/TEfos4aU9Q=="
+    )
+
+    Import-DscResource -ModuleName PsDesiredStateConfiguration
+
+    [String] $StorageAccountName = "linkedinautomation"
+    $secureacctKey = $AcctKey | ConvertTo-SecureString -AsPlainText -Force
+    $myStorageCredentials = New-Object System.Management.Automation.PSCredential ($StorageAccountName, $secureacctKey)
     
-    
-    # declare the VMs as nodes for which the configuration will happen. This can be parameterized using parantheses as comma separated names
-    # Configure the first node. This is the first VM
-    Node VM1_Windows
+    Node $NodeNames
     {
         # Make sure that IIS is installed
         WindowsFeature IIS
@@ -15,30 +21,28 @@ Configuration WebServer
             Ensure = 'Present'
             IncludeAllSubFeature = $true
         }
-        File index
+
+        # All the IISManagement Tools are also intalled
+        WindowsFeature IISMgmt
         {
-            Script ScriptExample
-            {
-                SetScript = {
-                    $vaStorageAccount = Get-AutomationVariable -Name "StorageAccount"
-                    $StartTime = Get-Date
-                    $EndTime = $startTime.AddHours(1.0)
-                    $stgAccount = Get-AzStorageAccount -Name $vaStorageAccount -ResourceGroupName $vResourceGroupname
-                    $SASToken = New-AzStorageAccountSASToken -Service 'Blob' -ResourceType Container,Object -Permission "racwdlup" -startTime $StartTime -ExpiryTime $EndTime -Context $stgAccount.Context
-                    $stgcontext = New-AzStorageContext -storageAccountName $stgAccount.StorageAccountName -SasToken $SASToken
+            Ensure = "Present"
+            Name = "Web-Mgmt-Tools"
+        }
 
-                    $Path = "$env:TEMP\index.htm"
-                    Remove-Item $Path -ErrorAction SilentlyContinue
+        WindowsFeature ASPNet45
+        {
+            Name = "Web-ASP-Net45"
+            Ensure = "Present"
+        }
 
-                    $blob = Get-AzStorageBlob -Container 'createvm' -Blob 'index.htm' -Context $stgcontext
-                    $tmp = Get-AzStorageBlobContent -CloudBlob $blob.ICloudBlob -Destination $Path -Context $stgcontext #.Context.FileEndPoint + "atcslfileshare"
-                }
-            }
-            Ensure = "Present" # Ensure the directory is Present on the target node.
-            Type = "File" # The default is File.
-            SourcePath = $Path
-            DestinationPath = "C:\inetpub\wwwroot\index.htm"
-            DependsOn = '[WindowsFeature]IIS'
+        File ASPNetWebsite
+        {
+            Ensure = "Present"
+            Credential = $myStorageCredentials
+            SourcePath =  "\\linkedinautomation.file.core.windows.net\configurevms"
+            DestinationPath = "C:\inetpub\wwwroot"
+            Recurse = $true
+            Type = "Directory"
         }
     }
 }
