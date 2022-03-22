@@ -3,10 +3,9 @@
 #This script will read the excel file uploaded to the storage account and will extract the values one row at a time.
 #and passes it on to another PowerShell script for the purpose of VM creation.
 
-$Creds = Get-AutomationPSCredential -Name 'Creds'
 $TenantID = Get-AutomationVariable -Name 'TenantID'
 
-Connect-AzAccount -ServicePrincipal -Credential $Creds -Tenant $TenantID
+Connect-AzAccount -Identity
 
 $vResourceGroupname = "LinkedInLearningAutomation"
 $vAutomationAccountName = "LinkedInAutomation"
@@ -25,7 +24,7 @@ try {Import-Module ImportExcel} catch {throw ; return}
 $Path = "$env:TEMP\VMDetails.xlsx"
 Remove-Item $Path -ErrorAction SilentlyContinue
 
-$blob = Get-AzStorageBlob -Container 'createvms' -Blob 'CreateVM.xlsx' -Context $stgcontext
+$blob = Get-AzStorageBlob -Container 'createvm' -Blob 'CreateVM.xlsx' -Context $stgcontext
 $tmp = Get-AzStorageBlobContent -CloudBlob $blob.ICloudBlob -Destination $Path -Context $stgcontext #.Context.FileEndPoint + "atcslfileshare"
 
 #import-module psexcel #it wasn't auto loading on my machine
