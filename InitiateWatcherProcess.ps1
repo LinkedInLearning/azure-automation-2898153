@@ -19,7 +19,7 @@ $SASToken = New-AzStorageAccountSASToken -Service 'Blob' -ResourceType Container
 $stgcontext = New-AzStorageContext -storageAccountName $stgAccount.StorageAccountName -SasToken $SASToken
 
   
-try {Import-Module ImportExcel} catch {throw ; return}
+#try {Import-Module ImportExcel} catch {throw ; return}
 
 $Path = "$env:TEMP\VMDetails.xlsx"
 Remove-Item $Path -ErrorAction SilentlyContinue
