@@ -1,19 +1,26 @@
+
 Configuration WebServer
 {
     param(
-    [Parameter(Mandatory=$true)]
     [string] $NodeNames = "localhost",
-    [string] $AcctKey = "4PJREBT6kPMh9ejQwIhoU+vmOWdd7WYCVIhDEbttPPZVln8HerqOCQR+PTXlSMd0AZd4tVdRPIy/TEfos4aU9Q=="
+    [string] $AcctKey = "gE7MNh3+HPF1nJAhtRhzDSqJWgizpE/g572kZ8s4D0jAhh+ocpKhP4NGRURAyaqq5CUXhnru7FwngrFqRhD9tg=="
     )
 
     Import-DscResource -ModuleName PsDesiredStateConfiguration
 
-    [String] $StorageAccountName = "linkedinautomation"
+    [String] $StorageAccountName = "Azure\linkedinautomation"
+
     $secureacctKey = $AcctKey | ConvertTo-SecureString -AsPlainText -Force
     $myStorageCredentials = New-Object System.Management.Automation.PSCredential ($StorageAccountName, $secureacctKey)
     
     Node $NodeNames
     {
+		WindowsFeature DSCServiceFeature
+		{
+			Ensure = "Present"
+			Name   = "DSC-Service"
+		}
+        
         # Make sure that IIS is installed
         WindowsFeature IIS
         {
@@ -39,10 +46,9 @@ Configuration WebServer
         {
             Ensure = "Present"
             Credential = $myStorageCredentials
-            SourcePath =  "\\linkedinautomation.file.core.windows.net\configurevms"
-            DestinationPath = "C:\inetpub\wwwroot"
-            Recurse = $true
-            Type = "Directory"
+            SourcePath =  "\\linkedinautomation.file.core.windows.net\configurevms\index.htm"
+            DestinationPath = "C:\inetpub\wwwroot\index.htm"
+            Type = "File"
         }
     }
 }
