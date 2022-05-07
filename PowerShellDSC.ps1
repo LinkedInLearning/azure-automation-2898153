@@ -11,7 +11,7 @@ Configuration WebServer
     Import-DscResource -Name Service -Module PsDesiredStateConfiguration
 
     [String] $StorageAccountName = "linkedinautomation"
-	[String] $StorageAccountUserName = "Azure\" + $StorageAccountName
+    [String] $StorageAccountUserName = "Azure\" + $StorageAccountName
     $secureacctKey = $AcctKey | ConvertTo-SecureString -AsPlainText -Force
     $myStorageCredentials = New-Object System.Management.Automation.PSCredential ($StorageAccountUserName, $secureacctKey)
     
